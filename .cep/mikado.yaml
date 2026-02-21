@@ -1,0 +1,292 @@
+project: "filebrain"
+updated: "2026-02-21"
+active_path: "goal > storage_layer > sqlite_metadata > design_schema"
+
+goal:
+  title: "Build a working File Brain that indexes local files and answers questions about them"
+  status: active
+  mhc: 11  # systematic — coordinating multiple subsystems into a working whole
+
+  children:
+    - title: "Project setup and infrastructure"
+      status: done
+      mhc: 9  # abstract — standard packaging and tooling decisions
+      completed: "2026-02-21"
+      children:
+        - title: "Scaffold Python package structure with pyproject.toml, src layout, pytest"
+          status: done
+          mhc: 8  # concrete — create directories and config files
+          completed: "2026-02-21"
+        - title: "Set up ollama with nomic-embed-text and a chat model"
+          status: done
+          mhc: 8  # concrete — install and pull models
+          completed: "2026-02-21"
+          note: "Verified ollama installed. nomic-embed-text already pulled. Chose qwen2.5:7b per ADR-001."
+        - title: "Create a smoke test that imports filebrain and runs pytest successfully"
+          status: done
+          mhc: 8  # concrete — prove the scaffolding works
+          completed: "2026-02-21"
+
+    - title: "Extractor interface and core extractors"
+      status: done
+      mhc: 10  # formal — designing the abstraction that all extractors share
+      completed: "2026-02-21"
+      children:
+        - title: "Design the Extractor interface via TDD"
+          status: done
+          mhc: 10  # formal — defining the contract between extractors and the pipeline
+          completed: "2026-02-21"
+          children:
+            - title: "Write test: an extractor receives a file path and returns extracted text + metadata dict"
+              status: done
+              mhc: 9
+              completed: "2026-02-21"
+            - title: "Write test: an extractor declares which file extensions and MIME types it handles"
+              status: done
+              mhc: 9
+              completed: "2026-02-21"
+            - title: "Write test: an extractor raises a clear error on unsupported or corrupt files"
+              status: done
+              mhc: 9
+              completed: "2026-02-21"
+            - title: "Implement the base Extractor protocol/ABC to pass all tests"
+              status: done
+              mhc: 9
+              completed: "2026-02-21"
+        - title: "Plain text extractor (.txt, .md, .log, .csv)"
+          status: done
+          mhc: 9  # abstract — straightforward implementation of the interface
+          completed: "2026-02-21"
+          children:
+            - title: "Write tests for plain text extraction including encoding detection"
+              status: done
+              mhc: 9
+              completed: "2026-02-21"
+            - title: "Implement PlainTextExtractor to pass tests"
+              status: done
+              mhc: 8
+              completed: "2026-02-21"
+        - title: "PDF extractor (.pdf)"
+          status: done
+          mhc: 9
+          completed: "2026-02-21"
+          children:
+            - title: "Write tests for PDF text extraction including multi-page and scanned PDFs"
+              status: done
+              mhc: 9
+              completed: "2026-02-21"
+            - title: "Implement PdfExtractor using pymupdf to pass tests"
+              status: done
+              mhc: 8
+              completed: "2026-02-21"
+        - title: "Code file extractor (.py, .js, .sh, .lisp, .go, etc.)"
+          status: done
+          mhc: 9
+          completed: "2026-02-21"
+          children:
+            - title: "Write tests for code extraction including language detection and docstring extraction"
+              status: done
+              mhc: 9
+              completed: "2026-02-21"
+            - title: "Implement CodeExtractor to pass tests"
+              status: done
+              mhc: 8
+              completed: "2026-02-21"
+        - title: "Extractor registry that maps file types to extractors"
+          status: done
+          mhc: 10  # formal — managing the relationship between file types and extractors
+          completed: "2026-02-21"
+          children:
+            - title: "Write test: registry returns correct extractor for a given file path"
+              status: done
+              mhc: 9
+              completed: "2026-02-21"
+            - title: "Write test: registry returns None for unrecognized file types"
+              status: done
+              mhc: 9
+              completed: "2026-02-21"
+            - title: "Implement ExtractorRegistry to pass tests"
+              status: done
+              mhc: 9
+              completed: "2026-02-21"
+
+    - title: "Storage layer"
+      status: pending
+      mhc: 11  # systematic — SQLite and vector DB working together coherently
+      children:
+        - title: "SQLite metadata store"
+          status: pending
+          mhc: 10  # formal — schema design for file metadata and processing state
+          children:
+            - title: "Design schema: files table (path, hash, size, mtime, type, extracted_text, status, timestamps)"
+              status: pending
+              mhc: 10
+            - title: "Write test: store a file record and retrieve it by path"
+              status: pending
+              mhc: 9
+            - title: "Write test: detect file has changed via hash comparison"
+              status: pending
+              mhc: 9
+            - title: "Write test: query files by status (pending, processed, failed)"
+              status: pending
+              mhc: 9
+            - title: "Implement MetadataStore to pass tests"
+              status: pending
+              mhc: 9
+        - title: "Vector store (ChromaDB)"
+          status: pending
+          mhc: 10  # formal — embedding storage and retrieval abstraction
+          note: "Document ChromaDB choice in ADR-002. Evaluate if Qdrant would be better."
+          children:
+            - title: "Write test: store an embedding with file reference metadata"
+              status: pending
+              mhc: 9
+            - title: "Write test: query by semantic similarity returns ranked results with source file paths"
+              status: pending
+              mhc: 9
+            - title: "Write test: delete embeddings when source file is removed"
+              status: pending
+              mhc: 9
+            - title: "Implement VectorStore to pass tests"
+              status: pending
+              mhc: 9
+
+    - title: "Embedding pipeline"
+      status: pending
+      mhc: 10  # formal — connecting extraction to embedding to storage
+      children:
+        - title: "Text chunking strategy"
+          status: pending
+          mhc: 10  # formal — balancing chunk size, overlap, and semantic coherence
+          note: "Document chunking strategy in ADR-003."
+          children:
+            - title: "Write test: chunk text into segments of target size with overlap"
+              status: pending
+              mhc: 9
+            - title: "Write test: short text below chunk size is returned as single chunk"
+              status: pending
+              mhc: 9
+            - title: "Write test: chunks preserve sentence boundaries where possible"
+              status: pending
+              mhc: 9
+            - title: "Implement TextChunker to pass tests"
+              status: pending
+              mhc: 9
+        - title: "Embedding generation via ollama"
+          status: pending
+          mhc: 9
+          children:
+            - title: "Write test: generate embedding vector from text chunk via ollama API"
+              status: pending
+              mhc: 9
+            - title: "Write test: embedding has expected dimensionality for nomic-embed-text"
+              status: pending
+              mhc: 9
+            - title: "Implement EmbeddingGenerator to pass tests"
+              status: pending
+              mhc: 8
+        - title: "Processing pipeline that wires extraction → chunking → embedding → storage"
+          status: pending
+          mhc: 11  # systematic — the full pipeline as a coordinated system
+          children:
+            - title: "Write test: given a file path, pipeline extracts, chunks, embeds, and stores"
+              status: pending
+              mhc: 10
+            - title: "Write test: pipeline skips already-processed files (same hash)"
+              status: pending
+              mhc: 9
+            - title: "Write test: pipeline marks failed files and continues to next"
+              status: pending
+              mhc: 9
+            - title: "Implement ProcessingPipeline to pass tests"
+              status: pending
+              mhc: 10
+
+    - title: "File watcher daemon"
+      status: pending
+      mhc: 10  # formal — inotify integration and event-driven processing
+      children:
+        - title: "Write test: detect new file in watched directory"
+          status: pending
+          mhc: 9
+        - title: "Write test: detect modified file"
+          status: pending
+          mhc: 9
+        - title: "Write test: detect deleted file and clean up embeddings"
+          status: pending
+          mhc: 9
+        - title: "Write test: batch mode scans directory tree for unprocessed files"
+          status: pending
+          mhc: 9
+        - title: "Implement FileWatcher using watchdog library to pass tests"
+          status: pending
+          mhc: 9
+        - title: "Implement batch scanner for initial indexing and nightly catch-up"
+          status: pending
+          mhc: 9
+
+    - title: "Query interface"
+      status: pending
+      mhc: 11  # systematic — retrieval + LLM + citation working together
+      children:
+        - title: "Semantic search without LLM"
+          status: pending
+          mhc: 9
+          children:
+            - title: "Write test: query returns relevant file paths ranked by similarity"
+              status: pending
+              mhc: 9
+            - title: "Implement search command that embeds query and searches vector store"
+              status: pending
+              mhc: 9
+        - title: "LLM-powered query with citations"
+          status: pending
+          mhc: 11  # systematic — prompt engineering + retrieval + verification
+          children:
+            - title: "Write test: query returns natural language answer citing source files"
+              status: pending
+              mhc: 10
+            - title: "Write test: answer includes file paths that actually exist"
+              status: pending
+              mhc: 9
+            - title: "Design RAG prompt that instructs model to cite sources and say when unsure"
+              status: pending
+              mhc: 10
+              note: "Document prompt strategy in ADR-004."
+            - title: "Implement QueryEngine to pass tests"
+              status: pending
+              mhc: 10
+        - title: "CLI interface"
+          status: pending
+          mhc: 9
+          children:
+            - title: "Implement 'filebrain scan <directory>' command to run batch indexing"
+              status: pending
+              mhc: 8
+            - title: "Implement 'filebrain watch <directory>' command to start daemon"
+              status: pending
+              mhc: 8
+            - title: "Implement 'filebrain query <question>' command for one-shot questions"
+              status: pending
+              mhc: 8
+            - title: "Implement 'filebrain status' to show index stats"
+              status: pending
+              mhc: 8
+
+    - title: "Audio/video transcription extractor"
+      status: pending
+      mhc: 10  # formal — integrating whisper into the extractor interface
+      note: "This is a stretch goal for the first build. Core file types first."
+      children:
+        - title: "Write test: extract transcript from audio file (.mp3, .wav, .m4a)"
+          status: pending
+          mhc: 9
+        - title: "Write test: extract transcript from video file (.mp4, .mkv, .webm)"
+          status: pending
+          mhc: 9
+        - title: "Implement AudioVideoExtractor using faster-whisper to pass tests"
+          status: pending
+          mhc: 9
+        - title: "Write test: long files are processed in segments to manage memory"
+          status: pending
+          mhc: 9
