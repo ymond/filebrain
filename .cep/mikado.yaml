@@ -1,6 +1,6 @@
 project: "filebrain"
-updated: "2026-02-21"
-active_path: "goal > storage_layer > sqlite_metadata > design_schema"
+updated: "2026-02-22"
+active_path: "goal > audio_video_transcription"  # only remaining non-stretch work is done
 
 goal:
   title: "Build a working File Brain that indexes local files and answers questions about them"
@@ -111,167 +111,215 @@ goal:
               completed: "2026-02-21"
 
     - title: "Storage layer"
-      status: pending
+      status: done
       mhc: 11  # systematic — SQLite and vector DB working together coherently
+      completed: "2026-02-22"
       children:
         - title: "SQLite metadata store"
-          status: pending
+          status: done
           mhc: 10  # formal — schema design for file metadata and processing state
+          completed: "2026-02-22"
           children:
             - title: "Design schema: files table (path, hash, size, mtime, type, extracted_text, status, timestamps)"
-              status: pending
+              status: done
               mhc: 10
+              completed: "2026-02-22"
             - title: "Write test: store a file record and retrieve it by path"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Write test: detect file has changed via hash comparison"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Write test: query files by status (pending, processed, failed)"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Implement MetadataStore to pass tests"
-              status: pending
+              status: done
               mhc: 9
-        - title: "Vector store (ChromaDB)"
-          status: pending
+              completed: "2026-02-22"
+        - title: "Vector store (Qdrant)"
+          status: done
           mhc: 10  # formal — embedding storage and retrieval abstraction
-          note: "Document ChromaDB choice in ADR-002. Evaluate if Qdrant would be better."
+          completed: "2026-02-22"
+          note: "ChromaDB was incompatible with Python 3.14. Switched to Qdrant per ADR-002."
           children:
             - title: "Write test: store an embedding with file reference metadata"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Write test: query by semantic similarity returns ranked results with source file paths"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Write test: delete embeddings when source file is removed"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Implement VectorStore to pass tests"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
 
     - title: "Embedding pipeline"
-      status: pending
+      status: done
       mhc: 10  # formal — connecting extraction to embedding to storage
+      completed: "2026-02-22"
       children:
         - title: "Text chunking strategy"
-          status: pending
+          status: done
           mhc: 10  # formal — balancing chunk size, overlap, and semantic coherence
-          note: "Document chunking strategy in ADR-003."
+          completed: "2026-02-22"
+          note: "Sentence-aware chunking with overlap. See ADR-003."
           children:
             - title: "Write test: chunk text into segments of target size with overlap"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Write test: short text below chunk size is returned as single chunk"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Write test: chunks preserve sentence boundaries where possible"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Implement TextChunker to pass tests"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
         - title: "Embedding generation via ollama"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-22"
           children:
             - title: "Write test: generate embedding vector from text chunk via ollama API"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Write test: embedding has expected dimensionality for nomic-embed-text"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Implement EmbeddingGenerator to pass tests"
-              status: pending
+              status: done
               mhc: 8
+              completed: "2026-02-22"
         - title: "Processing pipeline that wires extraction → chunking → embedding → storage"
-          status: pending
+          status: done
           mhc: 11  # systematic — the full pipeline as a coordinated system
+          completed: "2026-02-22"
           children:
             - title: "Write test: given a file path, pipeline extracts, chunks, embeds, and stores"
-              status: pending
+              status: done
               mhc: 10
+              completed: "2026-02-22"
             - title: "Write test: pipeline skips already-processed files (same hash)"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Write test: pipeline marks failed files and continues to next"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Implement ProcessingPipeline to pass tests"
-              status: pending
+              status: done
               mhc: 10
+              completed: "2026-02-22"
 
     - title: "File watcher daemon"
-      status: pending
+      status: done
       mhc: 10  # formal — inotify integration and event-driven processing
+      completed: "2026-02-22"
       children:
         - title: "Write test: detect new file in watched directory"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-22"
         - title: "Write test: detect modified file"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-22"
         - title: "Write test: detect deleted file and clean up embeddings"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-22"
         - title: "Write test: batch mode scans directory tree for unprocessed files"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-22"
         - title: "Implement FileWatcher using watchdog library to pass tests"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-22"
         - title: "Implement batch scanner for initial indexing and nightly catch-up"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-22"
 
     - title: "Query interface"
-      status: pending
+      status: done
       mhc: 11  # systematic — retrieval + LLM + citation working together
+      completed: "2026-02-22"
       children:
         - title: "Semantic search without LLM"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-22"
           children:
             - title: "Write test: query returns relevant file paths ranked by similarity"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Implement search command that embeds query and searches vector store"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
         - title: "LLM-powered query with citations"
-          status: pending
+          status: done
           mhc: 11  # systematic — prompt engineering + retrieval + verification
+          completed: "2026-02-22"
           children:
             - title: "Write test: query returns natural language answer citing source files"
-              status: pending
+              status: done
               mhc: 10
+              completed: "2026-02-22"
             - title: "Write test: answer includes file paths that actually exist"
-              status: pending
+              status: done
               mhc: 9
+              completed: "2026-02-22"
             - title: "Design RAG prompt that instructs model to cite sources and say when unsure"
-              status: pending
+              status: done
               mhc: 10
-              note: "Document prompt strategy in ADR-004."
+              completed: "2026-02-22"
+              note: "Documented in ADR-004."
             - title: "Implement QueryEngine to pass tests"
-              status: pending
+              status: done
               mhc: 10
+              completed: "2026-02-22"
         - title: "CLI interface"
-          status: pending
+          status: done
           mhc: 9
+          completed: "2026-02-22"
           children:
             - title: "Implement 'filebrain scan <directory>' command to run batch indexing"
-              status: pending
+              status: done
               mhc: 8
+              completed: "2026-02-22"
             - title: "Implement 'filebrain watch <directory>' command to start daemon"
-              status: pending
+              status: done
               mhc: 8
+              completed: "2026-02-22"
             - title: "Implement 'filebrain query <question>' command for one-shot questions"
-              status: pending
+              status: done
               mhc: 8
+              completed: "2026-02-22"
             - title: "Implement 'filebrain status' to show index stats"
-              status: pending
+              status: done
               mhc: 8
+              completed: "2026-02-22"
 
     - title: "Audio/video transcription extractor"
       status: pending
