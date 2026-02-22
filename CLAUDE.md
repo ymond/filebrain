@@ -1,6 +1,6 @@
 # CLAUDE.md
-# CEP v0.1.0 | Project: filebrain
-# Last upgraded: 2026-02-21
+# CEP v0.2.0 | Project: filebrain
+# Last upgraded: 2026-02-22
 
 ## Who I Am
 
@@ -29,6 +29,22 @@ This means:
    problem. Log it clearly in the session log with what you tried, then pick up
    a different task from the Mikado tree.
 
+4. **Keep going until the Mikado tree is done.** Do NOT stop after completing one
+   section of the tree to ask if you should continue. If there are pending nodes in
+   the Mikado tree that you can work on, work on them. The only reasons to stop are:
+   - Every node in the tree is either `done` or `blocked`
+   - You've hit a decision that is genuinely hard to reverse and would lead to
+     significant wasted work if you guess wrong (not just any ADR — most decisions
+     are easily reversible and you should just make them, document them, and keep going)
+   - You need information that only Raymond can provide and no other nodes are workable
+   Making decisions, writing ADRs, and logging them is part of working — not a reason
+   to pause. Document the decision, move on, keep building.
+
+5. **Do not invent features beyond the Mikado tree.** Only build what's specified.
+   However, at the end of a session, you may add a "Possibilities" section to the
+   session log suggesting features that the completed work opens up. These are
+   suggestions for Raymond to review, not tasks to implement.
+
 ## Startup — Every Time You Begin
 
 When I say "Read CLAUDE.md and follow instructions" or anything similar, this is
@@ -54,13 +70,26 @@ on all remaining nodes and need my input, or you've been working for an extended
 period and have reached a natural stopping point:
 
 1. **Write the session log** to `.cep/logs/YYYY-MM-DD.md` following the format below.
-2. **Update `.cep/mikado.yaml`** — mark completed nodes as `done` with today's date,
+2. **Write the blog post** to `.cep/blog/YYYY-MM-DD-short-title.md`.
+3. **Update the guidebook** — revise any pages in `.cep/guidebook/` affected by
+   this session's work. Create new component pages if new components were built.
+4. **Update `.cep/mikado.yaml`** — mark completed nodes as `done` with today's date,
    update `active_path` to the next logical starting point, add any new nodes
    discovered during this session.
-3. **Commit all work** with appropriate atomic commits.
-4. **Hibernate the machine** by running: `systemctl hibernate`
-   If hibernate is not available, run: `systemctl suspend`
-   This saves energy while I'm away. I'll wake the machine when I'm ready to review.
+5. **Commit all work** with appropriate atomic commits.
+6. **Announce completion audibly.** Play a sound so Raymond knows if he's nearby:
+   ```bash
+   espeak "Claude has finished working. The computer will shut down in 3 minutes. To cancel, run: sudo shutdown minus c." 2>/dev/null \
+     || printf '\a'
+   ```
+7. **Schedule a timed shutdown.** Do NOT ask if you should shut down — Raymond may
+   not be at the computer. Instead, schedule it with a cancellation window:
+   ```bash
+   sudo shutdown +3 "CEP: Claude Code session complete. Cancel with: sudo shutdown -c"
+   ```
+
+**CRITICAL: Do not ask "should I shut down?" or "would you like to continue?" —
+Raymond is not there. Steps 1-7 are all autonomous. No prompting. No waiting.**
 
 ## Documentation Requirements
 
@@ -97,7 +126,82 @@ for the first time.
 
 ### Open Questions
 Things I want Raymond's input on when he reviews this log.
+
+### Possibilities
+Features or improvements that the completed work makes possible or easier.
+These are suggestions for Raymond to consider, not tasks to implement.
 ```
+
+### Blog Posts
+
+After every work session, create `.cep/blog/YYYY-MM-DD-short-title.md` — a narrative,
+educational account of the session written for a **generalist programmer** who has
+encountered most languages, patterns, and conventions before but may not remember
+the specifics of any particular one.
+
+The blog is NOT a reformatted log. It's a teaching document. Write it as if explaining
+the session's work to a skilled but busy engineer over coffee. Key requirements:
+
+- **Explain the "why" behind architecture choices** in plain language. Don't just say
+  "we used the Strategy pattern" — explain what problem it solves, why it fits here,
+  and what the alternative would have looked like.
+- **Annotate conventions, idioms, and patterns** inline using labels:
+  - `[convention]` — language or ecosystem standard (e.g., `if __name__ == "__main__"`)
+  - `[idiom]` — common way of doing things in this language (e.g., list comprehensions)
+  - `[pattern: Strategy]` — GoF or well-known design pattern
+  - `[pattern: Repository]` — architectural pattern
+  - `[XP principle]` — Extreme Programming practice being applied
+  - `[best practice]` — widely accepted engineering practice
+  - `[DDIA concept]` — concept from Designing Data-Intensive Applications
+- **Assume the reader might not remember** how Python packages work, what `__init__.py`
+  does, why `src/` layout exists, how pytest discovers tests, etc. Briefly explain
+  these when they come up — one or two sentences is enough, just enough to jog memory.
+- **Show how this session's work fits into the larger system** being built. Where does
+  this piece connect? What depends on it? What does it enable next?
+- **Include small code snippets** when they illustrate a point, but the blog is about
+  understanding, not about reproducing the source code.
+
+The blog serves as a study resource. Over weeks of reading these, Raymond should
+naturally absorb how to architect software, recognize patterns, and think in terms
+of system design.
+
+### System Guidebook
+
+Maintain and update `.cep/guidebook/` — a wiki-style collection of documents that
+describe how the system works **right now**. Unlike the blog (which is linear and
+append-only), the guidebook is **cumulative and revised** every session.
+
+Structure:
+
+```
+.cep/guidebook/
+├── overview.md          # What this system is, how it all fits together
+├── architecture.md      # High-level component diagram, data flow, key abstractions
+├── [component].md       # One page per major component (e.g., extractors.md, storage.md)
+└── conventions.md       # Project-specific conventions, entry points, how to run things
+```
+
+Guidelines for the guidebook:
+
+- **`overview.md`** is the front page. A new reader starts here. It should explain
+  what the system does, what the major components are, and how data flows through them.
+  Keep it to one page. Update it every session.
+- **`architecture.md`** goes deeper. Component relationships, key abstractions and
+  their responsibilities, data models, and the reasoning behind major structural
+  decisions. Reference ADRs for detailed decision context.
+- **Component pages** explain one subsystem in detail: what it does, how it works
+  internally, its public interface, how to extend it, and what it depends on.
+  Created when a component is first built, updated as it evolves.
+- **`conventions.md`** explains things a generalist programmer needs to know to
+  work in this codebase: how to run it, how to run tests, where the entry point is,
+  what the directory structure means, language-specific conventions in use.
+- **Annotate generously** using the same labels as the blog (`[convention]`,
+  `[pattern]`, `[idiom]`, etc.). The guidebook assumes the reader is smart but
+  may not remember the specifics of this language or ecosystem.
+- **Every session, review and update** any guidebook pages affected by the work done.
+  If a new component was built, create its page. If an existing component changed,
+  update its page. If the overall architecture shifted, update `architecture.md`.
+  The guidebook must always reflect the current state of the system.
 
 ### Mikado Tree
 
