@@ -19,6 +19,9 @@ dev = [
     "pytest>=8.0,<9",
 ]
 
+[project.scripts]
+filebrain = "filebrain.cli.app:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/filebrain"]
 
