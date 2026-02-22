@@ -9,7 +9,8 @@ description = "Local-first file indexing and semantic search powered by local LL
 requires-python = ">=3.12"
 license = "MIT"
 dependencies = [
-    "pymupdf>=1.27,<2",  # PDF text extraction
+    "pymupdf>=1.27,<2",            # PDF text extraction
+    "qdrant-client>=1.12,<2",      # Vector database (local embedded mode, ADR-002)
 ]
 
 [project.optional-dependencies]
