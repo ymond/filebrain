@@ -1,0 +1,45 @@
+# sessions.yaml — backfilled by Raymond on 2026-02-22
+# Neither session created this file. Timestamps are best-effort estimates
+# derived from filesystem ctime on logs, ADRs, source files, and .cep directory.
+# Session IDs use the YYYYMMDD-HHMM format from CLAUDE.md spec, estimated from
+# the earliest artifact timestamps per session.
+
+- id: "20260221-0015"
+  claude_session: null  # not recorded
+  status: ended
+  started: "2026-02-21T00:15:00-08:00"  # estimated: .cep dir created at 00:17
+  ended: "2026-02-21T01:37:00-08:00"    # estimated: log written at 01:36
+  log: "logs/2026-02-21.md"              # note: filename doesn't follow YYYYMMDD-HHMM convention
+  blog: null                             # not created — Claude Code missed this
+  decisions:
+    - "001-chat-model.md"
+  commits: []                            # not recorded in session log
+  notes: >
+    First session. Bootstrapped project: package structure, ollama models,
+    extractor subsystem (48 tests). Log named by date only, not YYYYMMDD-HHMM.
+    No blog post written. No commits recorded. No sessions.yaml created.
+
+- id: "20260222-0010"
+  claude_session: null  # not recorded
+  status: ended
+  started: "2026-02-22T00:10:00-08:00"  # estimated: first test file at 00:15, session started a few min earlier
+  ended: "2026-02-22T00:35:00-08:00"    # estimated: last guidebook file at 00:33; CLAUDE.md updated at 01:27 (CEP upgrade?)
+  log: "logs/2026-02-22.md"             # note: filename doesn't follow YYYYMMDD-HHMM convention
+  blog: "blog/2026-02-22-from-storage-to-search.md"
+  decisions:
+    - "002-vector-database.md"
+    - "003-chunking-strategy.md"
+    - "004-rag-prompt-strategy.md"
+  commits:
+    - "bb73260"  # SQLite metadata store
+    - "c7776f3"  # Qdrant vector store
+    - "b3c1704"  # text chunking
+    - "c20d7e7"  # embedding generation
+    - "0baaf4d"  # processing pipeline
+    - "071af82"  # file watcher
+    - "2ef4b3d"  # query engine + LLM Q&A
+    - "a9c1a76"  # CLI interface
+  notes: >
+    Second session. Built storage through CLI (130 tests). Switched ChromaDB
+    to Qdrant (Python 3.14 compat). Log named by date only, not YYYYMMDD-HHMM.
+    No sessions.yaml created. Blog was written this session.
