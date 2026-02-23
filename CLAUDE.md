@@ -51,17 +51,38 @@ When I say "Read CLAUDE.md and follow instructions" or anything similar, this is
 your full startup procedure:
 
 1. **Read this entire CLAUDE.md.** You are doing this now.
-2. **Read `.cep/mikado.yaml`.** Find the `active_path` and locate the current
+2. **Initialize the session.** Generate a session ID by running:
+   ```bash
+   date +%Y%m%d-%H%M
+   ```
+   Use this as the session ID (e.g., `20260222-2130`). If Claude Code provides its
+   own session UUID (visible in "to resume enter `claude resume <uuid>`"), record
+   that too. Create or append to `.cep/sessions.yaml`:
+   ```yaml
+   - id: "20260222-2130"
+     claude_session: "claude-code-uuid-if-available"
+     status: active  # active | ended | resurrected
+     started: "2026-02-22T21:30:00"
+     ended: null
+     log: "logs/20260222-2130.md"
+     blog: "blog/20260222-2130-short-title.md"
+     decisions: []  # list of ADR filenames created this session
+     commits: []    # list of commit hashes
+   ```
+3. **Read `.cep/mikado.yaml`.** Find the `active_path` and locate the current
    active node (the deepest node with `status: active`).
-3. **Read the most recent session log in `.cep/logs/`.** Check for open questions,
+4. **Read the most recent session log in `.cep/logs/`.** Check for open questions,
    blocked tasks, and any notes from the previous session or from me.
-4. **Read any ADRs in `.cep/decisions/`** that are relevant to your current work.
-5. **State what you're about to work on** — the active node, its MHC level, and
+5. **Read any ADRs in `.cep/decisions/`** that are relevant to your current work.
+6. **State what you're about to work on** — the active node, its MHC level, and
    your plan for this session. Then begin.
 
 If the Mikado tree is fully complete, say so and ask me what's next.
 If there are open questions from a previous session that block progress, state them
 and work on a non-blocked node instead.
+If the most recent session in `sessions.yaml` has `status: resurrected`, read that
+session's log carefully — Raymond is asking you to continue or fix something from
+that session.
 
 ## Shutdown — When You've Done All You Can
 
@@ -69,37 +90,42 @@ When you have completed all reachable nodes in the Mikado tree, or you are block
 on all remaining nodes and need my input, or you've been working for an extended
 period and have reached a natural stopping point:
 
-1. **Write the session log** to `.cep/logs/YYYY-MM-DD.md` following the format below.
-2. **Write the blog post** to `.cep/blog/YYYY-MM-DD-short-title.md`.
+1. **Write the session log** to `.cep/logs/YYYYMMDD-HHMM.md` (using the session ID
+   from startup) following the format below.
+2. **Write the blog post** to `.cep/blog/YYYYMMDD-HHMM-short-title.md`.
 3. **Update the guidebook** — revise any pages in `.cep/guidebook/` affected by
    this session's work. Create new component pages if new components were built.
 4. **Update `.cep/mikado.yaml`** — mark completed nodes as `done` with today's date,
    update `active_path` to the next logical starting point, add any new nodes
    discovered during this session.
-5. **Commit all work** with appropriate atomic commits.
-6. **Announce completion audibly.** Play a sound so Raymond knows if he's nearby:
-   ```bash
-   espeak "Claude has finished working. The computer will shut down in 3 minutes. To cancel, run: sudo shutdown minus c." 2>/dev/null \
+5. **Update `.cep/sessions.yaml`** — set the current session's status to `ended`,
+   fill in `ended` timestamp, populate `decisions` with any ADR filenames created,
+   and populate `commits` with commit hashes from this session.
+6. **Commit all work** with appropriate atomic commits.
+7. **Announce completion audibly.** Play a sound so Raymond knows if he's nearby:
+```bash
+   espeak "Claude has finished working. The computer will sleep in 3 minutes. To cancel, run: kill all sleep." 2>/dev/null \
      || printf '\a'
-   ```
-7. **Schedule a timed shutdown.** Do NOT ask if you should shut down — Raymond may
-   not be at the computer. Instead, schedule it with a cancellation window:
-   ```bash
-   sudo shutdown +3 "CEP: Claude Code session complete. Cancel with: sudo shutdown -c"
-   ```
+```
+8. **Put the computer to sleep.** Raymond is likely asleep or away. Do NOT prompt.
+   Wait 3 minutes (so Raymond can cancel if nearby), then sleep:
+```bash
+   sleep 180 && systemctl suspend &
+   echo "CEP: Computer will sleep in 3 minutes. To cancel: kill %1"
+```
 
-**CRITICAL: Do not ask "should I shut down?" or "would you like to continue?" —
-Raymond is not there. Steps 1-7 are all autonomous. No prompting. No waiting.**
+**CRITICAL: Do not ask "should I sleep the computer?" or "would you like to continue?" —
+Raymond is not there. Steps 1-8 are all autonomous. No prompting. No waiting.**
 
 ## Documentation Requirements
 
 ### Session Logs
 
-After every work session, create or append to `.cep/logs/YYYY-MM-DD.md` with this
-structure:
+After every work session, create `.cep/logs/YYYYMMDD-HHMM.md` (matching the session
+ID) with this structure:
 
 ```markdown
-## Session: HH:MM - HH:MM
+## Session: YYYY-MM-DD HH:MM - HH:MM
 
 ### Summary
 One paragraph of what was accomplished in plain language.
@@ -134,7 +160,7 @@ These are suggestions for Raymond to consider, not tasks to implement.
 
 ### Blog Posts
 
-After every work session, create `.cep/blog/YYYY-MM-DD-short-title.md` — a narrative,
+After every work session, create `.cep/blog/YYYYMMDD-HHMM-short-title.md` — a narrative,
 educational account of the session written for a **generalist programmer** who has
 encountered most languages, patterns, and conventions before but may not remember
 the specifics of any particular one.
