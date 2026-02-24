@@ -1,6 +1,6 @@
 # CLAUDE.md
-# CEP v0.2.0 | Project: filebrain
-# Last upgraded: 2026-02-22
+# CEP v0.2.1 | Project: filebrain
+# Last upgraded: 2026-02-23
 
 ## Who I Am
 
@@ -95,19 +95,45 @@ period and have reached a natural stopping point:
 2. **Write the blog post** to `.cep/blog/YYYYMMDD-HHMM-short-title.md`.
 3. **Update the guidebook** — revise any pages in `.cep/guidebook/` affected by
    this session's work. Create new component pages if new components were built.
+   Follow the Guidebook Voice and Structure rules below exactly.
+   Also check if the project's **README.md** needs updating (see README guidelines
+   below) — new CLI commands, changed install steps, or new major features should
+   be reflected there.
 4. **Update `.cep/mikado.yaml`** — mark completed nodes as `done` with today's date,
    update `active_path` to the next logical starting point, add any new nodes
    discovered during this session.
 5. **Update `.cep/sessions.yaml`** — set the current session's status to `ended`,
    fill in `ended` timestamp, populate `decisions` with any ADR filenames created,
    and populate `commits` with commit hashes from this session.
-6. **Commit all work** with appropriate atomic commits.
-7. **Announce completion audibly.** Play a sound so Raymond knows if he's nearby:
+6. **MANDATORY: Verify all session artifacts exist before committing.** Run through
+   this checklist and confirm every item. If any artifact is missing, create it now.
+   Do NOT proceed to committing until every item passes.
+   ```
+   [ ] .cep/logs/YYYYMMDD-HHMM.md exists and has all sections
+       (Summary, Decisions Made, Mikado Tree Progress, What I Learned, Open Questions, Possibilities)
+   [ ] .cep/blog/YYYYMMDD-HHMM-short-title.md exists and is a narrative teaching
+       document (not a reformatted log — if it reads like the log, rewrite it)
+   [ ] .cep/guidebook/ has been reviewed — any pages affected by this session's work
+       are updated, new component pages created if new components were built
+   [ ] .cep/guidebook/README.md table of contents is current (all chapters listed)
+   [ ] .cep/mikado.yaml is updated — completed nodes marked done with dates,
+       active_path points to next logical starting point
+   [ ] .cep/sessions.yaml is updated — status set to ended, ended timestamp filled,
+       decisions and commits lists populated
+   [ ] README.md reviewed — updated if new commands, features, or setup steps were added
+   [ ] Any significant technical decisions have ADRs in .cep/decisions/
+   ```
+   **This checklist is not optional. Raymond relies on these artifacts for learning
+   and project continuity. A session without a blog post or with a stale guidebook
+   is an incomplete session, even if all the code works.**
+
+7. **Commit all work** with appropriate atomic commits.
+8. **Announce completion audibly.** Play a sound so Raymond knows if he's nearby:
 ```bash
    espeak "Claude has finished working. The computer will sleep in 3 minutes. To cancel, run: kill all sleep." 2>/dev/null \
      || printf '\a'
 ```
-8. **Put the computer to sleep.** Raymond is likely asleep or away. Do NOT prompt.
+9. **Put the computer to sleep.** Raymond is likely asleep or away. Do NOT prompt.
    Wait 3 minutes (so Raymond can cancel if nearby), then sleep:
 ```bash
    sleep 180 && systemctl suspend &
@@ -115,7 +141,7 @@ period and have reached a natural stopping point:
 ```
 
 **CRITICAL: Do not ask "should I sleep the computer?" or "would you like to continue?" —
-Raymond is not there. Steps 1-8 are all autonomous. No prompting. No waiting.**
+Raymond is not there. Steps 1-9 are all autonomous. No prompting. No waiting.**
 
 ## Documentation Requirements
 
@@ -193,41 +219,217 @@ of system design.
 
 ### System Guidebook
 
-Maintain and update `.cep/guidebook/` — a wiki-style collection of documents that
-describe how the system works **right now**. Unlike the blog (which is linear and
-append-only), the guidebook is **cumulative and revised** every session.
+Maintain and update `.cep/guidebook/` — a **reference book** that describes how the
+system works **right now**. Unlike the blog (which is linear and append-only), the
+guidebook is **cumulative and revised** every session. It reads like a book, not like
+documentation. It's the kind of thing you keep open on a second monitor while working
+in the codebase.
 
-Structure:
+#### Book Structure
+
+The guidebook follows a GitBook-style structure with `README.md` as the entrypoint:
 
 ```
 .cep/guidebook/
-├── overview.md          # What this system is, how it all fits together
-├── architecture.md      # High-level component diagram, data flow, key abstractions
-├── [component].md       # One page per major component (e.g., extractors.md, storage.md)
-└── conventions.md       # Project-specific conventions, entry points, how to run things
+├── README.md              # Table of Contents — the entrypoint. Links to every chapter.
+├── overview.md            # Ch 1: What this system is, quick start, tech stack
+├── architecture.md        # Ch 2: Component diagram, data flow, abstractions, patterns
+├── [component].md         # Ch 3+: Deep dives — one per major subsystem
+├── project-anatomy.md     # How the project is structured and WHY (language-specific)
+└── vision.md              # The road ahead — what's planned and the design philosophy
 ```
 
-Guidelines for the guidebook:
+**README.md** is the table of contents. It has a brief "About This Book" intro, then
+a table linking to every chapter with a one-line description of what the reader will
+find there. Group chapters into logical parts ("The System," "Deep Dives," "Working
+Here," "The Road Ahead"). Include a quick-reference section at the bottom with the
+most common commands and the tech stack summary. Also include a section listing all
+ADRs with links.
 
-- **`overview.md`** is the front page. A new reader starts here. It should explain
-  what the system does, what the major components are, and how data flows through them.
-  Keep it to one page. Update it every session.
-- **`architecture.md`** goes deeper. Component relationships, key abstractions and
-  their responsibilities, data models, and the reasoning behind major structural
-  decisions. Reference ADRs for detailed decision context.
-- **Component pages** explain one subsystem in detail: what it does, how it works
-  internally, its public interface, how to extend it, and what it depends on.
-  Created when a component is first built, updated as it evolves.
-- **`conventions.md`** explains things a generalist programmer needs to know to
-  work in this codebase: how to run it, how to run tests, where the entry point is,
-  what the directory structure means, language-specific conventions in use.
-- **Annotate generously** using the same labels as the blog (`[convention]`,
-  `[pattern]`, `[idiom]`, etc.). The guidebook assumes the reader is smart but
-  may not remember the specifics of this language or ecosystem.
+**Navigation links** appear at the top and bottom of every chapter page:
+```markdown
+[← Previous: Chapter Name](previous.md) | [Table of Contents](README.md) | [Next: Chapter Name →](next.md)
+```
+The first chapter omits the "Previous" link (starts with `[← Table of Contents]`).
+The last chapter omits the "Next" link. This creates a linear reading path through
+the book while allowing random access via the README.
+
+**Chapter ordering** should flow naturally: start with orientation (overview), then
+architecture, then deep dives into individual components, then practical working
+conventions, then vision/roadmap. Each chapter should be self-contained enough to
+read alone, but they should build on each other when read in order.
+
+#### The Voice
+
+The guidebook is written for **a generalist engineer who has seen everything before
+but needs explicit reminders.** This is the core voice principle. The reader:
+
+- Has probably initialized a project in this language before, but doesn't remember
+  the exact conventions for how the main function is defined, detected, and executed
+- Has encountered the Strategy pattern in their career, but needs a reminder of what
+  it is and why it fits *here specifically*
+- Knows what a database is, but needs the explicit walkthrough of why *this* schema
+  was designed this way and what the tradeoffs are
+- Has worked with threads before, but needs the concrete explanation of which threads
+  exist in *this* system and why the concurrency model is safe
+
+The voice is warm, confident, and peer-to-peer. Not condescending ("as you probably
+know..."), not academic ("one might consider..."), not terse (raw API docs). Write
+like you're explaining the system to a skilled colleague who just joined the project.
+
+Specific voice requirements:
+
+1. **Explain the "why" before the "what."** Don't just show the schema — explain why
+   these columns exist, why this one is the primary key, why that one is nullable.
+   The reader can see the code; the guidebook tells them what the code can't.
+
+2. **Name design patterns when they appear.** When the code uses the Strategy pattern,
+   say so: "This is the **Strategy pattern** — the algorithm varies by file type, but
+   the pipeline treats all extractors identically." Don't just label it — explain what
+   problem it solves here and what the alternative would look like.
+
+3. **Connect to the reader's experience.** Reference analogous systems: "If you've
+   worked with Django's ORM, this is the same idea: the Repository pattern separating
+   domain logic from persistence." "This is the same principle behind Git's
+   content-addressable storage." These anchors help the reader map new concepts onto
+   existing knowledge.
+
+4. **Write in prose, not lists.** The guidebook reads like a book, not a README.
+   Use paragraphs to explain concepts. Tables are fine for structured reference data
+   (schemas, component maps, dependency lists), but the explanations around them
+   should be flowing prose. Avoid bullet-point-driven documentation.
+
+5. **Each chapter opens with a blockquote summary.** One or two sentences that tell
+   the reader what they'll find and why they'd read this chapter:
+   ```markdown
+   > How Filebrain pulls text out of files. The Extractor interface, the registry
+   > that routes files, and how to add new ones. A study in the Strategy pattern.
+   ```
+
+6. **Include the "you've probably seen this" bridge.** When explaining a concept,
+   briefly acknowledge that the reader has encountered it before, then give the
+   concrete, specific version for this project:
+   - "If you've worked with Elasticsearch, you already know the concept: ingest
+     documents, index them, search them. This system does the same thing, but instead
+     of keyword-based indexing, it uses semantic embeddings."
+   - "You've seen this before if you've worked with serializer classes, codec
+     registries, or plugin systems."
+
+7. **Don't shy away from depth.** If understanding HNSW indexing matters for working
+   in this codebase, explain HNSW. If WAL mode is critical to the threading model,
+   explain WAL mode. The guidebook is a reference book — depth is the point. But
+   keep the depth *relevant* to this system, not a general CS textbook.
+
+8. **Cross-reference ADRs inline.** When a design decision is mentioned, link to
+   the ADR: "See [ADR-002](../decisions/002-title.md) for the full rationale."
+   The guidebook summarizes the decision in context; the ADR has the full
+   options-considered analysis.
+
+9. **Trace execution paths step by step.** When explaining a data flow or a command,
+   walk through each step with numbered paragraphs. At each step, explain what
+   happens AND why. For example, when explaining what happens when a user runs a
+   CLI command, trace from the shell finding the entry point script, through the
+   import system, to the main function, through each component that gets called.
+   This "follow the thread" approach teaches the reader to reason about systems.
+
+10. **Ground abstract concepts in this codebase.** When explaining a pattern or
+    principle, immediately show how it manifests in the actual code. Don't say "the
+    system uses dependency injection" — say "the ProcessingPipeline takes its stores,
+    chunker, and embedding generator as constructor arguments rather than creating
+    them internally. This means tests can pass in fakes, and the pipeline doesn't
+    know or care whether it's writing to Qdrant or an in-memory stub."
+
+#### Chapter Guidelines
+
+- **`overview.md`** is the "I have 5 minutes, orient me" chapter. What the system
+  is, how it works at a high level (a two-line diagram showing the main data flow if
+  applicable), core components as a reference table with what each does and where it
+  lives in the codebase, quick start commands, and the tech stack with brief rationale
+  for each choice. Update every session.
+
+- **`architecture.md`** is the system design chapter. Component diagram (ASCII art),
+  data flow for each major path (ingestion, query, etc.) explained step by step with
+  the "why" at each stage, key abstractions with the design patterns they embody
+  (name the pattern, explain why it fits, describe what the alternative would look
+  like), threading/concurrency model with practical implications, and a table of ADRs.
+  This is the chapter a new contributor reads after the overview to understand *how
+  the system thinks*.
+
+- **Component deep-dive pages** (e.g., `extractors.md`, `storage.md`) go deep on
+  one subsystem. Start with the problem it solves ("why does this component exist?"),
+  then the interface/abstraction, then each concrete implementation with what makes
+  it interesting, then how to extend it (with a concrete example — write a new
+  extractor, add a new storage backend), then error handling, then file locations.
+  Each component page should feel like a self-contained mini-chapter that teaches
+  the reader about this domain *through the lens of this specific codebase.*
+
+- **`project-anatomy.md`** explains the project structure for someone who might not
+  remember language-specific conventions. Walk through the build configuration file
+  field by field — explain what each section does, why it's there, and what
+  alternatives exist. Explain the directory layout and why it's organized this way
+  (e.g., why `src/` layout over flat layout in Python). Trace the entry point from
+  the command line through the runtime to the main function. Cover virtual
+  environments / dependency management, editable installs, testing setup (how tests
+  are discovered, how fakes work, why isolation matters), and coding style with
+  rationale. This is the "how do I even start working here" chapter. When a concept
+  is language-specific (e.g., `__init__.py` in Python, `Cargo.toml` in Rust), give
+  the one-sentence explanation of what it is and why it exists.
+
+- **`vision.md`** is the forward-looking chapter. What's built, what's planned,
+  what's the design philosophy, and how the current architecture supports the future
+  roadmap. This chapter helps the reader understand *why* certain abstractions exist
+  that might seem over-engineered for the current scope — they're designed for where
+  the system is going. Include the key technical decisions (e.g., RAG over fine-tuning)
+  with explanations that teach the reader about the tradeoffs in general, not just
+  for this project.
+
+#### Maintenance Rules
+
 - **Every session, review and update** any guidebook pages affected by the work done.
-  If a new component was built, create its page. If an existing component changed,
-  update its page. If the overall architecture shifted, update `architecture.md`.
-  The guidebook must always reflect the current state of the system.
+  If a new component was built, create its chapter page and add it to the README.md
+  table of contents with navigation links. If an existing component changed, update
+  its page. If the architecture shifted, update `architecture.md`.
+- **The guidebook must always reflect the current state of the system.** It is the
+  canonical reference for "how does this work right now." Stale guidebook pages are
+  worse than no guidebook — they teach the wrong things.
+- **When adding a new chapter,** insert it into the reading order, update the
+  README.md table of contents, and fix the prev/next navigation links on the
+  adjacent chapters.
+- **ADRs are referenced, not duplicated.** The guidebook summarizes decisions in
+  context ("we chose Qdrant because..."); the ADR has the full options-considered
+  analysis. Link to the ADR; don't copy its contents into the guidebook.
+- **Maintain the voice consistently.** Every page should read like it was written by
+  the same author — the warm, peer-to-peer, "you've seen this before" voice. If a
+  page reads like a raw API doc or a bullet-point checklist, rewrite it in prose.
+
+### README.md
+
+The project's `README.md` is the front door. It serves three audiences in order:
+
+1. **What is this?** A brief introduction — what the project does, what problem it
+   solves, who it's for. Someone landing on the repo should understand the project
+   in 30 seconds.
+
+2. **How do I use it?** Install instructions (or the equivalent for non-CLI projects),
+   a few usage examples that show the most common workflows, and a pointer to
+   `--help` or other self-service documentation. Keep this practical — the reader
+   wants to get running, not read a manual. For projects that aren't installable CLIs
+   (libraries, APIs, services), this section covers: how to add it as a dependency,
+   basic API usage examples, and a link to full API/usage documentation if it exists.
+
+3. **How do I contribute?** How to set up a development environment, and a link to
+   the `.cep/guidebook/` for understanding the system internals. Keep this section
+   short — the guidebook is the deep reference, not the README.
+
+The README should be updated whenever:
+- A new user-facing command, API endpoint, or feature is added
+- Install or setup steps change
+- The project's scope or purpose evolves
+- A section references something that no longer exists
+
+The README is NOT the place for detailed architecture, internal design decisions, or
+contributor conventions — those belong in the guidebook. The README points people
+*toward* the guidebook; it doesn't duplicate it.
 
 ### Mikado Tree
 
